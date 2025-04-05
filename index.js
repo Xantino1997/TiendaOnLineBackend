@@ -16,8 +16,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// Conexión a MongoDB
-mongoose.connect("mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+// Conexión a MongoDB"mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongoose.connect("mongodb+srv://Gali:GaliDev@clustertienda.u3umz.mongodb.net/?retryWrites=true&w=majority&appName=ClusterTienda", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
