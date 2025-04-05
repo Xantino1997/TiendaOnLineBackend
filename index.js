@@ -6,10 +6,10 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
 const { v2: cloudinary } = require("cloudinary");
 
-dotenv.config();
+// dotenv.config();
 
 const PORT = 5000;
 const SECRET = "claveSuperSecreta123"; // ⚠️ Usá dotenv en producción
