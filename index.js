@@ -1,3 +1,4 @@
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -5,24 +6,27 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const dotenv = require("dotenv");
+const { v2: cloudinary } = require("cloudinary");
+
+dotenv.config();
 
 const PORT = 5000;
 const SECRET = "claveSuperSecreta123"; // ⚠️ Usá dotenv en producción
 
-// Middlewares
+// Configuración Cloudinary
+cloudinary.config({
+  cloud_name: 'dpys1cl9z',
+  api_key: '163149469231334',
+  api_secret: '_lhw0-QOrtTRQj6rGVW79qtxbbc',
+});
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-// Conexión a MongoDB"mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-mongoose.connect("mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",{
+// Conexión MongoDB
+mongoose.connect("mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -35,9 +39,9 @@ const EventoSchema = new mongoose.Schema({
   title: String,
   provider: String,
   date: String,
-  imagePath: String,
-  price:Number,
-  category:String,
+  imagePath: String, // URL de Cloudinary
+  price: Number,
+  category: String,
 });
 const Evento = mongoose.model("Evento", EventoSchema);
 
@@ -48,12 +52,9 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// ─── MULTER CONFIG (subida de imágenes) ────────────────────────────
+// ─── MULTER CONFIG ─────────────────────────────────────────────────
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
@@ -64,22 +65,32 @@ app.get("/api/eventos", async (req, res) => {
 });
 
 app.post("/api/eventos", upload.single("image"), async (req, res) => {
-  const { title, provider, date,price,category } = req.body;
-  const imagePath = req.file ? req.file.path : "";
-  const nuevoEvento = new Evento({ title, provider, date,price,category, imagePath });
-  await nuevoEvento.save();
-  res.status(200).json({ message: "Evento guardado" });
+  try {
+    const { title, provider, date, price, category } = req.body;
+
+    let imageUrl = "";
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ folder: "eventos" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }).end(req.file.buffer);
+      });
+      imageUrl = result.secure_url;
+    }
+
+    const nuevoEvento = new Evento({ title, provider, date, price, category, imagePath: imageUrl });
+    await nuevoEvento.save();
+
+    res.status(200).json({ message: "Evento guardado", url: imageUrl });
+  } catch (error) {
+    console.error("❌ Error subiendo evento:", error);
+    res.status(500).json({ message: "Error subiendo evento" });
+  }
 });
 
 app.delete("/api/eventos/:id", async (req, res) => {
   try {
-    const evento = await Evento.findById(req.params.id);
-    if (!evento) return res.status(404).json({ message: "Evento no encontrado" });
-
-    if (evento.imagePath && fs.existsSync(evento.imagePath)) {
-      fs.unlinkSync(evento.imagePath);
-    }
-
     await Evento.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Evento eliminado" });
   } catch (err) {
@@ -89,15 +100,18 @@ app.delete("/api/eventos/:id", async (req, res) => {
 
 app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
   try {
-    const { title, provider, date,price,category } = req.body;
+    const { title, provider, date, price, category } = req.body;
     const evento = await Evento.findById(req.params.id);
     if (!evento) return res.status(404).json({ message: "Evento no encontrado" });
 
     if (req.file) {
-      if (evento.imagePath && fs.existsSync(evento.imagePath)) {
-        fs.unlinkSync(evento.imagePath);
-      }
-      evento.imagePath = req.file.path;
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ folder: "eventos" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }).end(req.file.buffer);
+      });
+      evento.imagePath = result.secure_url;
     }
 
     evento.title = title;
@@ -164,4 +178,4 @@ app.post("/api/login", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
+});//
