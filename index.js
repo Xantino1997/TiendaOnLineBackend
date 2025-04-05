@@ -14,7 +14,7 @@ const SECRET = "claveSuperSecreta123"; // ⚠️ Usá dotenv en producción
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Conexión a MongoDB"mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 mongoose.connect("mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",{
