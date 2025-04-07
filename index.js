@@ -155,10 +155,10 @@
 
 // // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("/api/eventos", async (req, res) => {
-  const eventos = await Evento.find();
-  res.json(eventos);
-});
+// app.get("/api/eventos", async (req, res) => {
+//   const eventos = await Evento.find();
+//   res.json(eventos);
+// });
 
 // app.post("/api/eventos", upload.single("image"), async (req, res) => {
 //   try {
@@ -342,7 +342,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Ruta de prueba
-app.get('/api/hola', (req, res) => {
+app.get('/api/eventos', (req, res) => {
   res.send('👋 ¡Hola! El backend con Express está funcionando.');
 });
 
