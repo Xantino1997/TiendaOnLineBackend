@@ -15,15 +15,13 @@
   "headers": [
     {
       "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://tienda-on-line-seven.vercel.app"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET,POST,PUT,DELETE,OPTIONS"
-        },
+     {
+    "source": "/(.*)",
+    "headers": [
+      {
+        "key": "Access-Control-Allow-Origin",
+        "value": "https://tienda-on-line-seven.vercel.app"
+      },
         {
           "key": "Access-Control-Allow-Headers",
           "value": "X-Requested-With, Content-Type, Accept, Authorization"
