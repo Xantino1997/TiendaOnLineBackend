@@ -105,7 +105,7 @@ app.post("/api/reset-password-request", async (req, res) => {
       html: `
         <div style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; font-family: Arial, sans-serif; background-color: #f9f9f9;">
           <div style="text-align: center;">
-            <img src="./Mi entrada Ya logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
+            <img src="/Mi entrada Ya logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
             <h2 style="color: #4caf50;">Restablecimiento de Contraseña</h2>
           </div>
           <p>Hola,</p>
