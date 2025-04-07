@@ -133,11 +133,11 @@ app.post("/api/reset-password-request", async (req, res) => {
           <p style="margin-top: 30px; font-size: 12px; color: #999;">© ${new Date().getFullYear()} Mi Entrada Ya</p>
         </div>
       `,
-       attachments: [{
-    filename: 'Mi entrada Ya logo.png',
-    path: './Mi entrada Ya logo.png', // ruta relativa
-    cid: 'logo', // este ID se usa en el src del <img>
-    }
+     attachments: [{
+  filename: 'Mi entrada Ya logo.png',
+  path: './Mi entrada Ya logo.png',
+  cid: 'logo',
+}];
 
     await transporter.sendMail(mailOptions);
 
