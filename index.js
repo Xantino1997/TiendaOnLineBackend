@@ -155,7 +155,7 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("/api/eventos", async (req, res) => {
+app.get("/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
@@ -194,7 +194,7 @@ app.post("/api/eventos", upload.single("image"), async (req, res) => {
   }
 });
 
-app.delete("/api/eventos/:id", async (req, res) => {
+app.delete("/eventos/:id", async (req, res) => {
   try {
     await Evento.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Evento eliminado" });
@@ -203,7 +203,7 @@ app.delete("/api/eventos/:id", async (req, res) => {
   }
 });
 
-app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
+app.put("/eventos/:id", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
     const evento = await Evento.findById(req.params.id);
@@ -238,7 +238,7 @@ app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
 
 // ─── RUTAS DE USUARIOS ─────────────────────────────────────────────
 
-app.post("/api/reset-password", async (req, res) => {
+app.post("/reset-password", async (req, res) => {
   const { email, token, password } = req.body;
 
   try {
@@ -278,7 +278,7 @@ app.post("/api/reset-password", async (req, res) => {
   }
 });
 
-app.post("/api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -297,7 +297,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
