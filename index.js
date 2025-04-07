@@ -72,7 +72,7 @@ const resetTokenSchema = new mongoose.Schema({
 const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
 
 // SOLICITUD DE CÓDIGO DE RECUPERACIÓN
-app.post("https://tienda-backend-eta.vercel.app/api/reset-password-request", async (req, res) => {
+app.post("api/reset-password-request", async (req, res) => {
   const { email } = req.body;
 
   try {
