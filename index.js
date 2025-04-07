@@ -13,6 +13,15 @@ const path = require('path');
 const logo = '/images/logo.png';
 dotenv.config();
 
+
+app.options('*', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://tienda-on-line-seven.vercel.app");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
+
 const PORT = 5000;
 // ⚠️ USANDO dotenv----------------------------------------------------
 const SECRET =  process.env.CLAVESECRET;  
