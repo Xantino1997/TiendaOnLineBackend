@@ -72,7 +72,7 @@ const resetTokenSchema = new mongoose.Schema({
 const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
 
 // SOLICITUD DE CÓDIGO DE RECUPERACIÓN
-app.post("/reset-password-request", async (req, res) => {
+app.post("https://tienda-backend-eta.vercel.app/api/reset-password-request", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -137,7 +137,7 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("/eventos", async (req, res) => {
+app.get("https://tienda-backend-eta.vercel.app/api/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
@@ -176,7 +176,7 @@ app.post("/eventos", upload.single("image"), async (req, res) => {
   }
 });
 
-app.delete("/api/eventos/:id", async (req, res) => {
+app.delete("https://tienda-backend-eta.vercel.app/api/eventos/:id", async (req, res) => {
   try {
     await Evento.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Evento eliminado" });
@@ -185,7 +185,7 @@ app.delete("/api/eventos/:id", async (req, res) => {
   }
 });
 
-app.put("/eventos/:id", upload.single("image"), async (req, res) => {
+app.put("https://tienda-backend-eta.vercel.app/api/eventos/:id", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
     const evento = await Evento.findById(req.params.id);
@@ -220,7 +220,7 @@ app.put("/eventos/:id", upload.single("image"), async (req, res) => {
 
 // ─── RUTAS DE USUARIOS ─────────────────────────────────────────────
 
-app.post("/reset-password", async (req, res) => {
+app.post("https://tienda-backend-eta.vercel.app/api/reset-password", async (req, res) => {
   const { email, token, password } = req.body;
 
   try {
@@ -260,7 +260,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
-app.post("/api/register", async (req, res) => {
+app.post("https://tienda-backend-eta.vercel.app/api/register", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -279,7 +279,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("https://tienda-backend-eta.vercel.app/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
