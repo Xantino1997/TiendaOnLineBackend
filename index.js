@@ -1,3 +1,4 @@
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -9,58 +10,29 @@ const dotenv = require("dotenv");
 const { v2: cloudinary } = require("cloudinary");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const path = require('path');
-const logo = '/images/logo.png';
 dotenv.config();
 
-
-app.options('*', (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://tienda-on-line-seven.vercel.app");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(200);
-});
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://tienda-on-line-seven.vercel.app");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
-
-
 const PORT = 5000;
-// ⚠️ USANDO dotenv----------------------------------------------------
-const SECRET =  'claveSuperSecreta123';  
-const DBMongoo = 'mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-cloudinaryName='dpys1cl9z'
-cloudinaryKey='163149469231334'
-cloudinarySecret='_lhw0-QOrtTRQj6rGVW79qtxbbc'
-MailPass='wvsl nkge rimp iagy'
+const SECRET = "claveSuperSecreta123"; // ⚠️ Usá dotenv en producción
+
 // Configuración Cloudinary
 cloudinary.config({
-  cloud_name: cloudinaryName,
-  api_key: cloudinaryKey,
-  api_secret: cloudinarySecret,
+  cloud_name: 'dpys1cl9z',
+  api_key: '163149469231334',
+  api_secret: '_lhw0-QOrtTRQj6rGVW79qtxbbc',
 });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
 // Conexión MongoDB
-mongoose
-  .connect(
-    DBMongoo,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => console.log("✅ Conectado a MongoDB"))
-  .catch((err) => console.error("❌ Error conectando a MongoDB:", err));
+mongoose.connect("mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Conectado a MongoDB"))
+.catch(err => console.error("❌ Error conectando a MongoDB:", err));
 
 // ─── MODELOS ───────────────────────────────────────────────────────
 
@@ -81,72 +53,59 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// MODELO ACTUALIZADO
 const resetTokenSchema = new mongoose.Schema({
   email: { type: String, required: true },
-  code: { type: String, required: true }, // Ahora se llama "code"
+  token: { type: String, required: true },
   expiresAt: { type: Date, required: true },
 });
-const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
-
-// SOLICITUD DE CÓDIGO DE RECUPERACIÓN
-app.post("reset-password-request", async (req, res) => {
+const ResetToken = mongoose.model("ResetToken", resetTokenSchema);     
+app.post("/api/reset-password-request", async (req, res) => {
   const { email } = req.body;
 
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "Correo no encontrado" });
 
-    // Generar código de 4 dígitos
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generar token único
+    const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutos
 
-    // Eliminar códigos anteriores del mismo email
-    await ResetToken.findOneAndDelete({ email });
+    // Guardar en base de datos
+    await ResetToken.findOneAndDelete({ email }); // Elimina token previo si existe
+    await new ResetToken({ email, token, expiresAt }).save();
 
-    // Guardar nuevo código
-    await new ResetToken({ email, code, expiresAt }).save();
-
-    // Enviar email
+    // Configurar transporte SMTP
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "devprueba.2022@gmail.com",
-        pass: MailPass,
+        user: process.env.EMAIL_USER, // tu email
+        pass: process.env.EMAIL_PASS, // tu contraseña o app password
       },
     });
 
+    const resetUrl = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
+
     const mailOptions = {
-      from: `"Mi Entrada Ya" <devprueba.2022@gmail.com>`,
+      from: `"Clínica Alcorta Salud" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Código de restablecimiento de contraseña",
       html: `
-        <div style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; font-family: Arial, sans-serif; background-color: #f9f9f9;">
-          <div style="text-align: center;">
-            <img src="/images/logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
-            <h2 style="color: #4caf50;">Restablecimiento de Contraseña</h2>
-          </div>
-          <p>Hola,</p>
-          <p>Recibimos una solicitud para restablecer tu contraseña. Usá el siguiente código (válido por 15 minutos):</p>
-          <div style="text-align: center; margin: 20px 0;">
-            <span style="font-size: 32px; color: #333; background-color: #e0f7fa; padding: 10px 20px; border-radius: 8px; letter-spacing: 3px; display: inline-block;">
-              ${code}
-            </span>
-          </div>
-          <p>Si no solicitaste este código, ignorá este mensaje.</p>
-          <p style="margin-top: 30px; font-size: 12px; color: #999;">© ${new Date().getFullYear()} Mi Entrada Ya</p>
-        </div>
+        <p>Hola, recibimos una solicitud para restablecer tu contraseña.</p>
+        <p>Este es tu enlace de restablecimiento (válido por 15 minutos):</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>Si no lo solicitaste, ignorá este mensaje.</p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: "📩 Código enviado. Revisá tu correo." });
+    res.status(200).json({ message: "📩 Este es el código de restablecimiento de contraseña. Revisá tu correo." });
   } catch (error) {
-    console.error("Error al enviar el correo:", error);
-    res.status(500).json({ message: "❌ Error al enviar el código" });
+    console.error("Error al enviar el correo de restablecimiento:", error);
+    res.status(500).json({ message: "❌ Error al enviar el correo" });
   }
 });
+ 
 
 // ─── MULTER CONFIG ─────────────────────────────────────────────────
 
@@ -155,36 +114,27 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("/eventos", async (req, res) => {
+app.get("/api/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
 
-app.post("/eventos", upload.single("image"), async (req, res) => {
+app.post("/api/eventos", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
 
     let imageUrl = "";
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "eventos" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(req.file.buffer);
+        cloudinary.uploader.upload_stream({ folder: "eventos" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }).end(req.file.buffer);
       });
       imageUrl = result.secure_url;
     }
 
-    const nuevoEvento = new Evento({
-      title,
-      provider,
-      date,
-      price,
-      category,
-      imagePath: imageUrl,
-    });
+    const nuevoEvento = new Evento({ title, provider, date, price, category, imagePath: imageUrl });
     await nuevoEvento.save();
 
     res.status(200).json({ message: "Evento guardado", url: imageUrl });
@@ -194,7 +144,7 @@ app.post("/eventos", upload.single("image"), async (req, res) => {
   }
 });
 
-app.delete("/eventos/:id", async (req, res) => {
+app.delete("/api/eventos/:id", async (req, res) => {
   try {
     await Evento.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Evento eliminado" });
@@ -203,21 +153,18 @@ app.delete("/eventos/:id", async (req, res) => {
   }
 });
 
-app.put("/eventos/:id", upload.single("image"), async (req, res) => {
+app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
     const evento = await Evento.findById(req.params.id);
-    if (!evento)
-      return res.status(404).json({ message: "Evento no encontrado" });
+    if (!evento) return res.status(404).json({ message: "Evento no encontrado" });
 
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "eventos" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(req.file.buffer);
+        cloudinary.uploader.upload_stream({ folder: "eventos" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }).end(req.file.buffer);
       });
       evento.imagePath = result.secure_url;
     }
@@ -238,53 +185,12 @@ app.put("/eventos/:id", upload.single("image"), async (req, res) => {
 
 // ─── RUTAS DE USUARIOS ─────────────────────────────────────────────
 
-app.post("/reset-password", async (req, res) => {
-  const { email, token, password } = req.body;
-
-  try {
-    const resetToken = await ResetToken.findOne({ email, code: token });
-
-    if (!resetToken) {
-      return res
-        .status(400)
-        .json({ message: "Código inválido o ya utilizado." });
-    }
-
-    if (resetToken.expiresAt < new Date()) {
-      await ResetToken.deleteOne({ email }); // Limpieza
-      return res
-        .status(400)
-        .json({ message: "El código ha expirado. Solicitá uno nuevo." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.findOneAndUpdate(
-      { email },
-      { password: hashedPassword }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado." });
-    }
-
-    await ResetToken.deleteOne({ email }); // Eliminamos el token usado
-
-    res
-      .status(200)
-      .json({ message: "✅ Contraseña restablecida exitosamente." });
-  } catch (error) {
-    console.error("Error al restablecer contraseña:", error);
-    res.status(500).json({ message: "❌ Error interno del servidor." });
-  }
-});
-
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists)
-      return res.status(400).json({ message: "El usuario ya existe" });
+    if (userExists) return res.status(400).json({ message: "El usuario ya existe" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
@@ -297,21 +203,17 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: "Usuario no encontrado" });
+    if (!user) return res.status(400).json({ message: "Usuario no encontrado" });
 
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword)
-      return res.status(400).json({ message: "Contraseña incorrecta" });
+    if (!validPassword) return res.status(400).json({ message: "Contraseña incorrecta" });
 
-    const token = jwt.sign({ id: user._id, email: user.email }, SECRET, {
-      expiresIn: "2h",
-    });
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET, { expiresIn: "2h" });
 
     res.status(200).json({
       message: "Login exitoso desde Backend",
@@ -331,23 +233,4 @@ app.post("/login", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-}); //
-
-
-// const express = require('express');
-// const app = express();
-// const PORT = process.env.PORT || 3000;
-
-// // Middleware para parsear JSON
-// app.use(express.json());
-
-// // Ruta de prueba
-// app.get('/api/eventos', (req, res) => {
-//   res.send('👋 ¡Hola! El backend con Express está funcionando.');
-// });
-
-// // Iniciar servidor
-// app.listen(PORT, () => {
-//   console.log(`Servidor escuchando en http://localhost:${PORT}`);
-// });
-
+});//
