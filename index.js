@@ -122,8 +122,8 @@ app.post("/api/reset-password-request", async (req, res) => {
        attachments: [{
     filename: 'Mi entrada Ya logo.png',
     path: './Mi entrada Ya logo.png', // ruta relativa
-    cid: 'logo' // este ID se usa en el src del <img>
-    };
+    cid: 'logo', // este ID se usa en el src del <img>
+    }
 
     await transporter.sendMail(mailOptions);
 
