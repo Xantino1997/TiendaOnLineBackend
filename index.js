@@ -10,16 +10,22 @@ const { v2: cloudinary } = require("cloudinary");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const path = require('path');
+const logo = '/images/logo.png';
 dotenv.config();
 
 const PORT = 5000;
-const SECRET = "claveSuperSecreta123"; // ⚠️ Usá dotenv en producción
-
+// ⚠️ USANDO dotenv----------------------------------------------------
+const SECRET =  process.env.CLAVESECRET;  
+const DBMongoo = process.env.MONGODB_URI;
+const cloudinaryName = process.env.cloudinaryName;
+const cloudinaryKey = process.env.cloudinaryKey;
+const cloudinarySecret = process.env.cloudinarySecret;
+const MailPass = process.env.MailPass;
 // Configuración Cloudinary
 cloudinary.config({
-  cloud_name: "dpys1cl9z",
-  api_key: "163149469231334",
-  api_secret: "_lhw0-QOrtTRQj6rGVW79qtxbbc",
+  cloud_name: cloudinaryName,
+  api_key: cloudinaryKey,
+  api_secret: cloudinarySecret,
 });
 
 // Middleware
@@ -29,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Conexión MongoDB
 mongoose
   .connect(
-    "mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    DBMongoo,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -66,7 +72,7 @@ const resetTokenSchema = new mongoose.Schema({
 const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
 
 // SOLICITUD DE CÓDIGO DE RECUPERACIÓN
-app.post("/api/reset-password-request", async (req, res) => {
+app.post("/reset-password-request", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -88,7 +94,7 @@ app.post("/api/reset-password-request", async (req, res) => {
       service: "gmail",
       auth: {
         user: "devprueba.2022@gmail.com",
-        pass: "wvsl nkge rimp iagy",
+        pass: MailPass,
       },
     });
 
@@ -99,7 +105,7 @@ app.post("/api/reset-password-request", async (req, res) => {
       html: `
         <div style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; font-family: Arial, sans-serif; background-color: #f9f9f9;">
           <div style="text-align: center;">
-            <img src="http://localhost:5000/images/logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
+            <img src="/images/logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
             <h2 style="color: #4caf50;">Restablecimiento de Contraseña</h2>
           </div>
           <p>Hola,</p>
@@ -131,12 +137,12 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("/api/eventos", async (req, res) => {
+app.get("/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
 
-app.post("/api/eventos", upload.single("image"), async (req, res) => {
+app.post("/eventos", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
 
@@ -179,7 +185,7 @@ app.delete("/api/eventos/:id", async (req, res) => {
   }
 });
 
-app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
+app.put("/eventos/:id", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
     const evento = await Evento.findById(req.params.id);
@@ -214,7 +220,7 @@ app.put("/api/eventos/:id", upload.single("image"), async (req, res) => {
 
 // ─── RUTAS DE USUARIOS ─────────────────────────────────────────────
 
-app.post("/api/reset-password", async (req, res) => {
+app.post("/reset-password", async (req, res) => {
   const { email, token, password } = req.body;
 
   try {
