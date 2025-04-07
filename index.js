@@ -137,7 +137,7 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("https://tienda-backend-eta.vercel.app/api/eventos", async (req, res) => {
+app.get("api/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
