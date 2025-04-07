@@ -105,7 +105,7 @@ app.post("/api/reset-password-request", async (req, res) => {
       html: `
         <div style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; font-family: Arial, sans-serif; background-color: #f9f9f9;">
           <div style="text-align: center;">
-            <img src="http://localhost:5000/images/logo.png" alt="Logo Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
+            <img src="cid:logo" alt="Mi Entrada Ya" style="width: 120px; margin-bottom: 20px;" />
             <h2 style="color: #4caf50;">Restablecimiento de Contraseña</h2>
           </div>
           <p>Hola,</p>
@@ -119,6 +119,10 @@ app.post("/api/reset-password-request", async (req, res) => {
           <p style="margin-top: 30px; font-size: 12px; color: #999;">© ${new Date().getFullYear()} Mi Entrada Ya</p>
         </div>
       `,
+       attachments: [{
+    filename: 'Mi entrada Ya logo.png',
+    path: './Mi entrada Ya logo.png', // ruta relativa
+    cid: 'logo' // este ID se usa en el src del <img>
     };
 
     await transporter.sendMail(mailOptions);
