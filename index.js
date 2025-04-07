@@ -90,7 +90,7 @@ const resetTokenSchema = new mongoose.Schema({
 const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
 
 // SOLICITUD DE CÓDIGO DE RECUPERACIÓN
-app.post("api/reset-password-request", async (req, res) => {
+app.post("reset-password-request", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -160,7 +160,7 @@ app.get("/eventos", async (req, res) => {
   res.json(eventos);
 });
 
-app.post("/api/eventos", upload.single("image"), async (req, res) => {
+app.post("/eventos", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
 
