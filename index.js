@@ -137,12 +137,12 @@ const upload = multer({ storage });
 
 // ─── RUTAS DE EVENTOS ──────────────────────────────────────────────
 
-app.get("api/eventos", async (req, res) => {
+app.get("/api/eventos", async (req, res) => {
   const eventos = await Evento.find();
   res.json(eventos);
 });
 
-app.post("/eventos", upload.single("image"), async (req, res) => {
+app.post("/api/eventos", upload.single("image"), async (req, res) => {
   try {
     const { title, provider, date, price, category } = req.body;
 
