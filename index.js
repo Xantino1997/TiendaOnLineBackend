@@ -35,10 +35,10 @@ const PORT = 5000;
 // ⚠️ USANDO dotenv----------------------------------------------------
 const SECRET =  'claveSuperSecreta123';  
 const DBMongoo = 'mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-const cloudinaryName = process.env.cloudinaryName;
-const cloudinaryKey = process.env.cloudinaryKey;
-const cloudinarySecret = process.env.cloudinarySecret;
-const MailPass = process.env.MailPass;
+cloudinaryName='dpys1cl9z'
+cloudinaryKey='163149469231334'
+cloudinarySecret='_lhw0-QOrtTRQj6rGVW79qtxbbc'
+MailPass='wvsl nkge rimp iagy'
 // Configuración Cloudinary
 cloudinary.config({
   cloud_name: cloudinaryName,
