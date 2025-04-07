@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 const PORT = 5000;
 // ⚠️ USANDO dotenv----------------------------------------------------
 const SECRET =  process.env.CLAVESECRET;  
-const DBMongoo = process.env.MONGODB_URI;
+const DBMongoo = 'mongodb+srv://ala282016:Gali282016*@cluster0.8xzv1tn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 const cloudinaryName = process.env.cloudinaryName;
 const cloudinaryKey = process.env.cloudinaryKey;
 const cloudinarySecret = process.env.cloudinarySecret;
